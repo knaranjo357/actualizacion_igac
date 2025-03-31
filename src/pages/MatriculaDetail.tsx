@@ -15,6 +15,17 @@ const DATABASE_NAMES = {
   cica: 'CICA'
 };
 
+interface ParsedAnnotation {
+  number: string;
+  date: string;
+  radicacion: string;
+  document: string;
+  value: string;
+  specification: string;
+  from?: string;
+  to?: string;
+}
+
 export function MatriculaDetail() {
   const { matricula } = useParams();
   const navigate = useNavigate();
@@ -22,6 +33,26 @@ export function MatriculaDetail() {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const { fetchDatabase } = useDatabase();
+
+  const parseAnnotation = (annotation: string): ParsedAnnotation | null => {
+    if (!annotation) return null;
+
+    const parts = annotation.split(';').map(part => part.trim());
+    const parsed: Partial<ParsedAnnotation> = {};
+
+    parts.forEach(part => {
+      if (part.startsWith('Nro:')) parsed.number = part.replace('Nro:', '').trim();
+      else if (part.startsWith('Fecha:')) parsed.date = part.replace('Fecha:', '').trim();
+      else if (part.startsWith('Radicación:')) parsed.radicacion = part.replace('Radicación:', '').trim();
+      else if (part.startsWith('Doc:')) parsed.document = part.replace('Doc:', '').trim();
+      else if (part.startsWith('Valor_Acto:')) parsed.value = part.replace('Valor_Acto:', '').trim();
+      else if (part.startsWith('Especificacion:')) parsed.specification = part.replace('Especificacion:', '').trim();
+      else if (part.startsWith('De:')) parsed.from = part.replace('De:', '').trim();
+      else if (part.startsWith('A:')) parsed.to = part.replace('A:', '').trim();
+    });
+
+    return parsed as ParsedAnnotation;
+  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -62,6 +93,55 @@ export function MatriculaDetail() {
     });
 
     return matches;
+  };
+
+  const renderAnnotations = (record: any) => {
+    const annotations: { [key: string]: string } = {};
+    Object.entries(record).forEach(([key, value]) => {
+      if (key.startsWith('Anotacion_') && value) {
+        annotations[key] = value as string;
+      }
+    });
+
+    if (Object.keys(annotations).length === 0) return null;
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nro</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Radicación</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especificación</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">De</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">A</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {Object.entries(annotations).map(([key, value]) => {
+              const parsed = parseAnnotation(value);
+              if (!parsed) return null;
+
+              return (
+                <tr key={key} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{parsed.number}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parsed.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parsed.radicacion}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{parsed.document}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parsed.value}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{parsed.specification}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{parsed.from || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{parsed.to || '-'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
   };
 
   const renderSalvedades = (records: any[]) => {
@@ -150,6 +230,8 @@ export function MatriculaDetail() {
                 
                 {dbName === 'vurSalvedades' ? (
                   renderSalvedades(records)
+                ) : dbName === 'vurAnotaciones' ? (
+                  renderAnnotations(records[0])
                 ) : (
                   <div className="overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">

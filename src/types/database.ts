@@ -22,11 +22,14 @@ export const MATRICULA_COLUMNS = {
 // Helper function to normalize matricula values
 export const normalizeMatricula = (matricula: string): string => {
   if (!matricula) return '';
-  // Remove '320-' prefix if it exists and trim whitespace
-  return matricula.replace(/^320-/, '').trim();
+  // Remove '320-' prefix if it exists, remove dots, and trim whitespace
+  return matricula
+    .replace(/^320-/, '')
+    .replace(/\./g, '')
+    .trim();
 };
 
-// Helper function to find matching R2 reco///rd for R1
+// Helper function to find matching R2 record for R1
 export const findMatchingR2Record = (
   r1Record: DatabaseRecord,
   r2Data: DatabaseRecord[]
@@ -36,8 +39,8 @@ export const findMatchingR2Record = (
   );
 };
 
-// const BASE_URL = 'https://alejandronaranjo357.app.n8n.cloud/webhook';
 const BASE_URL = 'https://mariagomez1.app.n8n.cloud/webhook';
+
 export const ENDPOINTS = {
   reconocedores: `${BASE_URL}/reconocedores`,
   vurGeneral: `${BASE_URL}/vur-general`,
