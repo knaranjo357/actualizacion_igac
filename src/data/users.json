@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "email": "maria.gomez@igac.com",
+      "password": "t3.4m0",
+      "role": "root"
+    },
+    {
+      "email": "administrador@igac.com",
+      "password": "v1su4l1z4d0r",
+      "role": "admin"
+    }
+    
+  ]
+}
