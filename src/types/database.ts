@@ -39,7 +39,7 @@ export const findMatchingR2Record = (
   );
 };
 
-const BASE_URL = 'https://mariagomez1.app.n8n.cloud/webhook';
+const BASE_URL = 'https://n8n.alliasoft.com/webhook';
 
 export const ENDPOINTS = {
   reconocedores: `${BASE_URL}/reconocedores`,
